@@ -10,6 +10,9 @@ into Neo4j and Elasticsearch without using an Airflow DAG.
 import sys
 import textwrap
 import uuid
+import subprocess
+import logging
+
 from elasticsearch import Elasticsearch
 from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,12 +30,26 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
-es_host = None
-neo_host = None
-if len(sys.argv) > 1:
-    es_host = sys.argv[1]
-if len(sys.argv) > 2:
-    neo_host = sys.argv[2]
+# es_host = None
+# neo_host = None
+# if len(sys.argv) > 1:
+#     es_host = sys.argv[1]
+# if len(sys.argv) > 2:
+#     neo_host = sys.argv[2]
+
+def get_host(bashCommand):
+
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE, text=True)
+    output, error = process.communicate()
+
+    return str(output).replace("\'","")
+
+
+neo = "kubectl get service/neo4j -o jsonpath='{.spec.clusterIP}'"
+es = "kubectl get service/my-amundsen-elasticsearch-client -o jsonpath='{.spec.clusterIP}'"
+
+neo_host = get_host(neo)
+es_host = get_host(es)
 
 es = Elasticsearch([
     {'host': es_host if es_host else 'localhost'},
@@ -52,16 +69,16 @@ neo4j_password = 'test'
 
 # todo: connection string needs to change
 def connection_string():
-    user = 'username'
-    host = 'localhost'
-    port = '5432'
-    db = 'postgres'
+    user = ''
+    host = 'tf-data-advana.cne5xixz3s9b.eu-west-1.redshift.amazonaws.com'
+    port = '5439'
+    db = 'poc'
     return "postgresql://%s@%s:%s/%s" % (user, host, port, db)
 
 
 def run_postgres_job():
     where_clause_suffix = textwrap.dedent("""
-        where table_schema = 'public'
+        where table_schema = 'resources'
     """)
 
     tmp_folder = '/var/tmp/amundsen/table_metadata'
@@ -165,7 +182,7 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
 
 if __name__ == "__main__":
     # Uncomment next line to get INFO level logging
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
     loading_job = run_postgres_job()
     loading_job.launch()
