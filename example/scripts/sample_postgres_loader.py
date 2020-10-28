@@ -45,8 +45,11 @@ def get_host(bashCommand):
     return str(output).replace("\'","")
 
 
-neo = "kubectl get service/neo4j -o jsonpath='{.spec.clusterIP}'"
-es = "kubectl get service/my-amundsen-elasticsearch-client -o jsonpath='{.spec.clusterIP}'"
+# neo_local = "kubectl get service/neo4j -o jsonpath='{.spec.clusterIP}'"
+# es_local = "kubectl get service/my-amundsen-elasticsearch-client -o jsonpath='{.spec.clusterIP}'"
+
+neo = "kubectl get service/neo4j -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+es = "kubectl get service/my-amundsen-elasticsearch-client -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
 
 neo_host = get_host(neo)
 es_host = get_host(es)
@@ -69,7 +72,7 @@ neo4j_password = 'test'
 
 # todo: connection string needs to change
 def connection_string():
-    user = ''
+    user = 'anton_sugonyaki:yfz3vjLnEXRuHmawjWLosYfE'
     host = 'tf-data-advana.cne5xixz3s9b.eu-west-1.redshift.amazonaws.com'
     port = '5439'
     db = 'poc'
