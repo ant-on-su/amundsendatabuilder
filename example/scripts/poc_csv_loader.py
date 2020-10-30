@@ -51,6 +51,7 @@ from databuilder.transformer.generic_transformer import GenericTransformer, CALL
 # neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')
 
 def csv_col_drop(csv,cols,sep):
+    import pandas as pd
 
     with open(csv, 'r') as csv_file:
         df = pd.read_csv(csv_file, sep=sep)
@@ -63,7 +64,6 @@ def csv_col_drop(csv,cols,sep):
 
 def csv_checker(path, sep=";"):
     import glob
-    import pandas as pd
 
     table_cols = ['database','cluster','schema','name','description','tags','is_view','description_source']
     col_cols = ['name','description','col_type','sort_order','database','cluster','schema','table_name']
