@@ -72,7 +72,7 @@ neo4j_password = 'test'
 
 # todo: connection string needs to change
 def connection_string():
-    user = 'anton_sugonyaki:yfz3vjLnEXRuHmawjWLosYfE'
+    user = ''
     host = 'tf-data-advana.cne5xixz3s9b.eu-west-1.redshift.amazonaws.com'
     port = '5439'
     db = 'poc'
